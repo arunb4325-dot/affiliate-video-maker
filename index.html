@@ -104,7 +104,7 @@ async function downloadVideo(){
   }
   rec.start();if(audio)await audio.play().catch(()=>{});frame(performance.now());
   statusEl.textContent='वीडियो बन रहा है… लगभग 8 सेकंड रुकें।';
-  setTimeout(()=>{running=false;if(rec.state!=='inactive')rec.stop()},8000);
+  setTimeout(()=>{running=false;if(rec.state!=='inactive')rec.stop()},20000);
  }catch(e){statusEl.textContent='वीडियो नहीं बन पाया। Chrome में दोबारा कोशिश करें।';if(audio)audio.pause();if(audioCtx)audioCtx.close()}
 }
 </script>
