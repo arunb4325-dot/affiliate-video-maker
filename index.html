@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Affiliate Video Maker</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f4f8;padding:18px;color:#222}
+.box{max-width:500px;margin:auto;background:white;padding:20px;border-radius:16px}
+h1{color:#d92332}
+input,button{width:100%;padding:13px;margin:8px 0;box-sizing:border-box;border-radius:9px}
+input{border:1px solid #ccc}
+button{background:#d92332;color:white;border:0;font-weight:bold}
+#preview{width:100%;margin-top:15px}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>👖 Affiliate Video Maker</h1>
+<p>अपनी Shirt और Jeans की फोटो से Reel तैयार करो।</p>
+
+<label>कपड़ों की फोटो चुनें</label>
+<input type="file" id="photo" accept="image/*" multiple>
+
+<label>वीडियो का शीर्षक</label>
+<input id="title" value="स्टाइलिश Jeans और Shirt 🔥">
+
+<label>कीमत / ऑफर</label>
+<input id="price" placeholder="सही कीमत लिखें">
+
+<label>खरीदने का संदेश</label>
+<input id="message" value="लिंक Bio में देखें">
+
+<button onclick="makeVideo()">वीडियो का प्रीव्यू देखें</button>
+<canvas id="preview" width="360" height="640"></canvas>
+<p id="status"></p>
+</div>
+
+<script>
+function makeVideo(){
+ const files=document.getElementById('photo').files;
+ const c=document.getElementById('preview');
+ const ctx=c.getContext('2d');
+ const status=document.getElementById('status');
+ if(!files.length){status.textContent='पहले फोटो चुनें।';return;}
+ const img=new Image();
+ img.onload=function(){
+  ctx.fillStyle='#222';ctx.fillRect(0,0,360,640);
+  const scale=Math.max(360/img.width,640/img.height);
+  const w=img.width*scale,h=img.height*scale;
+  ctx.drawImage(img,(360-w)/2,(640-h)/2,w,h);
+  ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,360,145);
+  ctx.fillRect(0,500,360,140);
+  ctx.fillStyle='white';ctx.textAlign='center';
+  ctx.font='bold 23px Arial';
+  ctx.fillText(document.getElementById('title').value,180,55,330);
+  ctx.font='bold 25px Arial';
+  ctx.fillText(document.getElementById('price').value||'अपना ऑफर लिखें',180,550,330);
+  ctx.font='20px Arial';
+  ctx.fillText(document.getElementById('message').value,180,600,330);
+  status.textContent='प्रीव्यू तैयार है! अभी यह फोटो प्रीव्यू है, वीडियो फ़ाइल नहीं।';
+ };
+ img.src=URL.createObjectURL(files[0]);
+}
+</script>
+</body>
+</html>
