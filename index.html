@@ -1,112 +1,265 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Affiliate Video Maker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Affiliate Assistant</title>
 <style>
 *{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#f4f4f8;padding:14px;color:#222}
-.box{max-width:500px;margin:auto;background:white;padding:18px;border-radius:16px}
+body{font-family:Arial,sans-serif;background:#f3f4f8;padding:14px;color:#222}
+.box{max-width:520px;margin:auto;background:white;padding:18px;border-radius:16px}
 h1{color:#d92332}
 label{display:block;margin-top:14px;font-weight:bold}
-input,textarea,button{width:100%;padding:13px;margin:7px 0;border-radius:9px;font-size:16px}
+input,textarea,button{width:100%;padding:12px;margin:7px 0;border-radius:9px;font-size:16px}
 input,textarea{border:1px solid #ccc}
 button{background:#d92332;color:white;border:0;font-weight:bold}
 .secondary{background:#333}
-canvas{width:100%;height:auto;margin-top:14px;background:#222}
-.note{font-size:14px;line-height:1.5;background:#fff4d8;padding:10px;border-radius:8px}
+canvas,video{width:100%;margin-top:12px;background:#222;border-radius:8px}
+.note{font-size:13px;line-height:1.5;background:#fff4d8;padding:10px;border-radius:8px}
 </style>
 </head>
 <body>
 <div class="box">
-<h1>👖 Affiliate Video Maker</h1>
-<p>Jeans, Shirt और Shoes की फोटो से Reel बनाएं।</p>
-<label>फोटो चुनें</label><input type="file" id="photo" accept="image/*">
-<label>वीडियो का शीर्षक</label><input id="title" value="स्टाइलिश Jeans और Shirt 🔥">
-<label>कीमत / ऑफर</label><input id="price" placeholder="सही कीमत लिखें">
-<label>खरीदने का संदेश</label><input id="message" value="लिंक Bio में देखें">
-<label>हिंदी वॉइसओवर टेक्स्ट</label>
-<textarea id="voiceText" rows="3">नया स्टाइलिश लुक! कीमत और खरीदने का लिंक Bio में देखें।</textarea>
-<button class="secondary" onclick="speakHindi()">🗣️ हिंदी आवाज़ सुनें</button>
-<label>बैकग्राउंड म्यूज़िक चुनें</label><input type="file" id="music" accept="audio/*">
-<p class="note">केवल वही म्यूज़िक इस्तेमाल करें जिसके उपयोग का अधिकार आपके पास हो।</p>
-<button onclick="makePreview()">प्रीव्यू देखें</button>
-<canvas id="preview" width="360" height="640"></canvas>
-<button onclick="downloadVideo()">🎬 वीडियो डाउनलोड करें (WebM)</button>
-<p id="status">पहले फोटो चुनें।</p>
-<p class="note">ध्यान दें: यह WebM वीडियो बनाता है, MP4 नहीं। हिंदी आवाज़ अभी अलग से सुनाई जाती है और डाउनलोड वीडियो में शामिल नहीं होती। चुना गया म्यूज़िक वीडियो में शामिल हो सकता है।</p>
+<h1>🤖 AI Affiliate Assistant</h1>
+<p>फोटो या बनी-बनाई वीडियो से अपनी Reel तैयार करो।</p>
+
+<label>1. फोटो चुनें (अधिकतम 5)</label>
+<input id="photos" type="file" accept="image/*" multiple>
+
+<label>2. या बनी-बनाई वीडियो चुनें</label>
+<input id="uploadedVideo" type="file" accept="video/*">
+
+<label>वीडियो का टाइटल</label>
+<input id="title" value="स्टाइलिश Jeans और Shirt 🔥">
+
+<label>प्रोडक्ट की कीमत</label>
+<input id="price" placeholder="जैसे ₹599">
+
+<label>Affiliate लिंक</label>
+<input id="link" type="url" placeholder="अपना सही प्रोडक्ट लिंक डालें">
+
+<label>वीडियो पर संदेश</label>
+<input id="message" value="लिंक Bio में देखें">
+
+<label>Instagram कैप्शन</label>
+<textarea id="caption" rows="3">इस स्टाइलिश लुक को देखें! 🛍️ कीमत और खरीदने का लिंक नीचे देखें।</textarea>
+
+<label>हैशटैग</label>
+<input id="hashtags" value="#fashion #clothing #shopping">
+
+<label>बैकग्राउंड म्यूज़िक (वैकल्पिक)</label>
+<input id="music" type="file" accept="audio/*">
+
+<button onclick="prepare()">📱 वीडियो का प्रीव्यू</button>
+<canvas id="canvas" width="360" height="640"></canvas>
+<video id="videoPreview" controls hidden></video>
+
+<button onclick="downloadReel()">🎬 वीडियो डाउनलोड करें</button>
+<button class="secondary" onclick="copyCaption()">📝 कैप्शन कॉपी करें</button>
+<button class="secondary" onclick="copyLink()">🔗 Affiliate लिंक कॉपी करें</button>
+<button onclick="approvePost()">✅ प्रीव्यू मंजूर</button>
+
+<p id="status" class="note">पहले फोटो या तैयार वीडियो चुनें।</p>
+<p class="note">यह वेबसाइट फोटो से WebM वीडियो बना सकती है। अपलोड की गई वीडियो का प्रीव्यू और डाउनलोड उपलब्ध है। Instagram पर ऑटो-पोस्टिंग अभी कनेक्ट नहीं है।</p>
 </div>
+
 <script>
-let img=null;
-const c=document.getElementById('preview'),x=c.getContext('2d');
-const statusEl=document.getElementById('status');
-function draw(){
- if(!img)return;
- x.fillStyle='#222';x.fillRect(0,0,360,640);
- const s=Math.max(360/img.width,500/img.height),w=img.width*s,h=img.height*s;
- x.drawImage(img,(360-w)/2,(500-h)/2,w,h);
- x.fillStyle='rgba(0,0,0,.72)';x.fillRect(0,0,360,120);x.fillRect(0,500,360,140);
- x.fillStyle='white';x.textAlign='center';x.font='bold 22px Arial';
- x.fillText(document.getElementById('title').value,180,55,330);
- x.font='bold 27px Arial';x.fillText(document.getElementById('price').value||'अपना ऑफर लिखें',180,550,330);
- x.font='20px Arial';x.fillText(document.getElementById('message').value,180,600,330);
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const statusBox=document.getElementById('status');
+const videoPreview=document.getElementById('videoPreview');
+let images=[],approved=false,recordedBlob=null,uploadedURL='';
+
+function setStatus(message){
+ statusBox.textContent=message;
 }
-function makePreview(){
- const f=document.getElementById('photo').files[0];
- if(!f){statusEl.textContent='पहले फोटो चुनें।';return}
- const u=URL.createObjectURL(f),i=new Image();
- i.onload=()=>{img=i;draw();URL.revokeObjectURL(u);statusEl.textContent='प्रीव्यू तैयार है।'};
- i.onerror=()=>statusEl.textContent='फोटो नहीं खुली। दूसरी फोटो चुनें.';
- i.src=u;
+
+function drawPhoto(image,number=0,progress=0){
+ const W=360,H=640;
+ ctx.fillStyle='#222';
+ ctx.fillRect(0,0,W,H);
+ const scale=Math.max(W/image.width,500/image.height);
+ const zoom=1+0.06*progress;
+ const w=image.width*scale*zoom;
+ const h=image.height*scale*zoom;
+ const pan=(number%2===0?1:-1)*12*progress;
+ ctx.save();
+ ctx.beginPath();
+ ctx.rect(0,0,W,500);
+ ctx.clip();
+ ctx.drawImage(image,(W-w)/2+pan,(500-h)/2,w,h);
+ ctx.restore();
+
+ ctx.fillStyle='rgba(0,0,0,.72)';
+ ctx.fillRect(0,0,W,120);
+ ctx.fillRect(0,500,W,140);
+ ctx.fillStyle='white';
+ ctx.textAlign='center';
+ ctx.font='bold 22px Arial';
+ ctx.fillText(document.getElementById('title').value,180,50,330);
+ ctx.font='bold 27px Arial';
+ ctx.fillText(document.getElementById('price').value||'ऑफर देखें',180,550,330);
+ ctx.font='20px Arial';
+ ctx.fillText(document.getElementById('message').value,180,600,330);
 }
-document.getElementById('photo').addEventListener('change',makePreview);
-function speakHindi(){
- if(!('speechSynthesis' in window)){statusEl.textContent='इस ब्राउज़र में आवाज़ उपलब्ध नहीं है।';return}
- speechSynthesis.cancel();
- const u=new SpeechSynthesisUtterance(document.getElementById('voiceText').value);
- u.lang='hi-IN';u.rate=.92;speechSynthesis.speak(u);
- statusEl.textContent='हिंदी आवाज़ चल रही है। यह अभी डाउनलोड वीडियो में शामिल नहीं है।';
+
+async function loadImages(){
+ const files=Array.from(document.getElementById('photos').files).slice(0,5);
+ images=await Promise.all(files.map(file=>new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+  img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('फोटो नहीं खुली'))};
+  img.src=url;
+ })));
 }
-async function downloadVideo(){
- if(!img){makePreview();statusEl.textContent='फोटो लोड होने के बाद फिर डाउनलोड दबाएं।';return}
- if(!c.captureStream||!window.MediaRecorder){statusEl.textContent='Chrome में खोलकर दोबारा कोशिश करें।';return}
- let audio=null,audioCtx=null,rec=null;
+
+async function prepare(){
+ approved=false;
+ recordedBlob=null;
+ const videoFile=document.getElementById('uploadedVideo').files[0];
+
+ if(videoFile){
+  if(uploadedURL)URL.revokeObjectURL(uploadedURL);
+  uploadedURL=URL.createObjectURL(videoFile);
+  videoPreview.src=uploadedURL;
+  videoPreview.hidden=false;
+  canvas.hidden=true;
+  videoPreview.load();
+  setStatus('तैयार वीडियो का प्रीव्यू देखें। मंजूरी के बाद डाउनलोड कर सकते हैं।');
+  return;
+ }
+
+ if(!document.getElementById('photos').files.length){
+  setStatus('पहले फोटो या तैयार वीडियो चुनें।');
+  return;
+ }
+
  try{
-  const stream=c.captureStream(30),f=document.getElementById('music').files[0];
-  if(f){
-   audio=new Audio(URL.createObjectURL(f));audio.loop=true;
-   audioCtx=new (window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
-   const src=audioCtx.createMediaElementSource(audio),dest=audioCtx.createMediaStreamDestination();
-   src.connect(dest);dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
-  }
-  const type=MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')?'video/webm;codecs=vp8,opus':'video/webm';
-  rec=new MediaRecorder(stream,{mimeType:type});const chunks=[];
-  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
-  rec.onstop=()=>{
-   const url=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
-   const a=document.createElement('a');a.href=url;a.download='affiliate-reel.webm';a.click();
-   setTimeout(()=>URL.revokeObjectURL(url),10000);
-   if(audio){audio.pause();URL.revokeObjectURL(audio.src)}
-   if(audioCtx)audioCtx.close();
-   statusEl.textContent='WebM वीडियो डाउनलोड शुरू हुआ। हिंदी आवाज़ वीडियो में शामिल नहीं है।';
-  };
-  let start=performance.now(),running=true;
-  function frame(t){
-   if(!running)return;
-   const s=Math.max(360/img.width,500/img.height)*(1+.02*Math.sin((t-start)/1000*2)),w=img.width*s,h=img.height*s;
-   x.fillStyle='#222';x.fillRect(0,0,360,640);x.drawImage(img,(360-w)/2,(500-h)/2,w,h);
-   x.fillStyle='rgba(0,0,0,.72)';x.fillRect(0,0,360,120);x.fillRect(0,500,360,140);
-   x.fillStyle='white';x.textAlign='center';x.font='bold 22px Arial';x.fillText(document.getElementById('title').value,180,55,330);
-   x.font='bold 27px Arial';x.fillText(document.getElementById('price').value||'अपना ऑफर लिखें',180,550,330);
-   x.font='20px Arial';x.fillText(document.getElementById('message').value,180,600,330);
-   requestAnimationFrame(frame);
-  }
-  rec.start();if(audio)await audio.play().catch(()=>{});frame(performance.now());
-  statusEl.textContent='वीडियो बन रहा है… लगभग 8 सेकंड रुकें।';
-  setTimeout(()=>{running=false;if(rec.state!=='inactive')rec.stop()},20000);
- }catch(e){statusEl.textContent='वीडियो नहीं बन पाया। Chrome में दोबारा कोशिश करें।';if(audio)audio.pause();if(audioCtx)audioCtx.close()}
+  await loadImages();
+  canvas.hidden=false;
+  videoPreview.hidden=true;
+  drawPhoto(images[0],0,0);
+  setStatus(images.length+' फोटो तैयार हैं। अब वीडियो डाउनलोड कर सकते हैं।');
+ }catch(e){
+  setStatus('फोटो लोड नहीं हुई। दूसरी फोटो चुनें।');
+ }
 }
+
+async function downloadReel(){
+ const videoFile=document.getElementById('uploadedVideo').files[0];
+ if(videoFile){
+  const a=document.createElement('a');
+  a.href=uploadedURL||URL.createObjectURL(videoFile);
+  a.download=videoFile.name;
+  a.click();
+  setStatus('तैयार वीडियो डाउनलोड शुरू हुआ।');
+  return;
+ }
+
+ if(!images.length)await prepare();
+ if(!images.length)return;
+
+ if(!canvas.captureStream||!window.MediaRecorder){
+  setStatus('कृपया Chrome ब्राउज़र में कोशिश करें।');
+  return;
+ }
+
+ let stream=canvas.captureStream(30);
+ let audio=null,audioCtx=null;
+ const musicFile=document.getElementById('music').files[0];
+
+ try{
+  if(musicFile){
+   audio=new Audio(URL.createObjectURL(musicFile));
+   audio.loop=true;
+   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+   await audioCtx.resume();
+   const source=audioCtx.createMediaElementSource(audio);
+   const destination=audioCtx.createMediaStreamDestination();
+   source.connect(destination);
+   destination.stream.getAudioTracks().forEach(track=>stream.addTrack(track));
+  }
+
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+   ?'video/webm;codecs=vp8,opus':'video/webm';
+  const recorder=new MediaRecorder(stream,{mimeType:mime});
+  const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  recorder.onstop=()=>{
+   recordedBlob=new Blob(chunks,{type:'video/webm'});
+   const url=URL.createObjectURL(recordedBlob);
+   const a=document.createElement('a');
+   a.href=url;
+   a.download='affiliate-reel.webm';
+   a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),30000);
+   if(audio)audio.pause();
+   if(audioCtx)audioCtx.close();
+   setStatus('वीडियो डाउनलोड हो गई। Instagram पर पोस्ट करने से पहले इसे चेक करें।');
+  };
+
+  let start=performance.now();
+  let running=true;
+  const duration=20000;
+  const perPhoto=duration/images.length;
+
+  function frame(now){
+   if(!running)return;
+   const elapsed=now-start;
+   const index=Math.min(images.length-1,Math.floor(elapsed/perPhoto));
+   const progress=(elapsed-index*perPhoto)/perPhoto;
+   drawPhoto(images[index],index,progress);
+   if(elapsed<duration)requestAnimationFrame(frame);
+  }
+
+  recorder.start();
+  if(audio)await audio.play().catch(()=>{});
+  requestAnimationFrame(frame);
+  setStatus('20 सेकंड की वीडियो बन रही है…');
+
+  setTimeout(()=>{
+   running=false;
+   if(recorder.state!=='inactive')recorder.stop();
+  },duration);
+ }catch(e){
+  setStatus('वीडियो नहीं बनी। Chrome में दोबारा कोशिश करें।');
+  if(audio)audio.pause();
+  if(audioCtx)await audioCtx.close();
+ }
+}
+
+function copyCaption(){
+ const text=document.getElementById('caption').value+'\n'+
+ document.getElementById('hashtags').value;
+ copyText(text,'कैप्शन कॉपी हो गया।');
+}
+function copyLink(){
+ const link=document.getElementById('link').value.trim();
+ if(!link){setStatus('पहले अपना affiliate लिंक डालें।');return}
+ copyText(link,'Affiliate लिंक कॉपी हो गया।');
+}
+async function copyText(text,message){
+ try{
+  await navigator.clipboard.writeText(text);
+  setStatus(message);
+ }catch(e){
+  const field=document.createElement('textarea');
+  field.value=text;
+  document.body.appendChild(field);
+  field.select();
+  const ok=document.execCommand('copy');
+  field.remove();
+  setStatus(ok?message:'टेक्स्ट चुनकर कॉपी करें।');
+ }
+}
+function approvePost(){
+ approved=true;
+ setStatus('तुमने प्रीव्यू मंजूर किया। अब वीडियो डाउनलोड करके Instagram पर मैन्युअल पोस्ट करो। ऑटो-पोस्टिंग अभी कनेक्ट नहीं है।');
+}
+document.getElementById('photos').addEventListener('change',prepare);
+document.getElementById('uploadedVideo').addEventListener('change',prepare);
 </script>
 </body>
 </html>
